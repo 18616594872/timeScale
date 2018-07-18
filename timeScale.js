@@ -57,17 +57,19 @@
         dragDown(e, type){
              e=e || window.event;
 
-             this._location = this.getLocation(e);
-             this.clickY = this._location.y;
-             this.clickX = this._location.x;
-             this.operateType = type;
-             this.preview = $(".preview");
+            this._location = this.getLocation(e);
+            this.clickY = this._location.y;
+            this.clickX = this._location.x;
+            this.operateType = type;
+            this.preview = $(".preview");
+            this.pareOffset=this.preview.parent().offset();
+            this.pareWidth=parseFloat(this.preview.parent().css('width'));
 
-             return false;
+            return false;
 
         },
         dragMove(){
-            let _this=this;
+            let _this=this; 
 
             return function(e){
                 if(_this.operateType){
@@ -75,7 +77,7 @@
                     let location=_this.getLocation(e);
                     switch (_this.operateType){
                         case "w":
-                            console.log('w');
+                            _this.move(_this.operateType,location,_this.preview);
                             break;
                         case "e":
                             _this.move(_this.operateType,location,_this.preview);
@@ -98,13 +100,21 @@
 
             switch (operateType){
                 case "w":
-
+                    
+                    let reduce_length = this.clickX - location.x;
+                    this.clickX = location.x;
+                    preview.css({
+                        width:parseInt(preview.css('width'))+reduce_length+ "px",
+                        left:this.clickX+ "px"
+                    });
                     break;
                 case "e":
+                    if(location.x>=(this.pareWidth+this.pareOffset.left)){location.x=this.pareWidth+this.pareOffset.left}
+
                     let add_length = this.clickX - location.x;
                     this.clickX = location.x;
                     preview.css({
-                        width:parseInt(preview.css('width'))-add_length
+                        width:parseInt(preview.css('width'))-add_length+ "px"
                     });
                     break;
             }
