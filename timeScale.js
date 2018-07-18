@@ -54,6 +54,10 @@
                 y: e.y || e.clientY
             }
         },
+        getScaleStyle(prop){
+            let propStyle = prop != undefined ?this.preview.parent().css(prop):this.preview.parent().offset().left;
+            return propStyle;
+        },
         dragDown(e, type){
              e=e || window.event;
 
@@ -62,8 +66,8 @@
             this.clickX = this._location.x;
             this.operateType = type;
             this.preview = $(".preview");
-            this.pareOffset=this.preview.parent().offset();
-            this.pareWidth=parseFloat(this.preview.parent().css('width'));
+            this.pareOffsetX=this.getScaleStyle();
+            this.pareWidth=parseFloat(this.getScaleStyle('width'));
 
             return false;
 
@@ -100,16 +104,19 @@
 
             switch (operateType){
                 case "w":
-                    
+                    let previewLeft = parseFloat(preview.css('left'));
+                    if(this.clickX != (previewLeft+this.pareOffsetX))  { this.clickX = (previewLeft+this.pareOffsetX);break;}
+                    if(location.x<=this.pareOffsetX){location.x=this.pareOffsetX}
+
                     let reduce_length = this.clickX - location.x;
                     this.clickX = location.x;
                     preview.css({
-                        width:parseInt(preview.css('width'))+reduce_length+ "px",
-                        left:this.clickX+ "px"
+                        width:(parseInt(preview.css('width'))+reduce_length)+ "px",
+                        left:(this.clickX-this.pareOffsetX)+ "px"
                     });
                     break;
                 case "e":
-                    if(location.x>=(this.pareWidth+this.pareOffset.left)){location.x=this.pareWidth+this.pareOffset.left}
+                    if(location.x>=(this.pareWidth+this.pareOffsetX)){location.x=this.pareWidth+this.pareOffsetX}
 
                     let add_length = this.clickX - location.x;
                     this.clickX = location.x;
