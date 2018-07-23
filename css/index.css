@@ -1,0 +1,32 @@
+.demoDiv{
+    position: absolute;
+    top:50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+.leftBtn,.rightBtn
+{ position:absolute; background:rgb(67, 77, 90); width:3px; height:19px; z-index:5; }
+
+.leftBtn {cursor:w-resize;}
+.rightBtn {right:0; cursor:e-resize;}
+.timeScale{
+    width: 570px;
+    height: 30px;
+    position: relative;
+    background: url("../image/templateScale.png") no-repeat;
+    background-size: 100%;
+}
+.showTime{
+    width: 80px;
+    height: 20px;
+    position: absolute;
+    border: 1px solid #000;
+    top: 31px;
+    left: 150px;
+    display: none;
+}
+.showTime>span{
+    font-size: 13px;
+    padding: 2px;
+    box-sizing: border-box;
+}

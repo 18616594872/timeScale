@@ -1,5 +1,5 @@
 /**
- * Created by dhl on 2018/6/16.
+ * 时间刻度插件
  */
 ;
 (function($, window, document,undefined){
@@ -17,9 +17,12 @@
         this._name = pluginName;
         this._location=null;
         this.clickX=0;//保留上次的X轴位置
-        this.clickY=0;// 保留上次的Y轴位置
         this.preview=null;// 要处理的对象
-        this.operateType=null;
+        this.operateType=null;// w:表示向左拉，e:表示向有拉
+        this.btnWidth=3 //按钮宽度
+        this.LeftTime='00:00' //保留上次左边时间
+        this.RightTime='00:00' //保留上次由边时间
+        this.pareOffsetX=0;//距离左边的偏移度
         this.init();
     }
     TimeScale.prototype={
@@ -35,7 +38,7 @@
                         <div class="leftBtn" id="leftBtn" ></div>
                         <div class="rightBtn" id="rightBtn"></div>
                     </div>
-                    <div class="showDate" id="showDate"><span></span></div>
+                    <div class="showTime" id="showTime"><span></span></div>
                 </div>
                 `;
             $(_this.element).append(scaleHtml)
@@ -62,10 +65,10 @@
              e=e || window.event;
 
             this._location = this.getLocation(e);
-            this.clickY = this._location.y;
             this.clickX = this._location.x;
             this.operateType = type;
             this.preview = $(".preview");
+            this.showTime=$('.showTime');
             this.pareOffsetX=this.getScaleStyle();
             this.pareWidth=parseFloat(this.getScaleStyle('width'));
 
@@ -79,13 +82,10 @@
                 if(_this.operateType){
                     e =e || window.event;
                     let location=_this.getLocation(e);
-                    switch (_this.operateType){
-                        case "w":
-                            _this.move(_this.operateType,location,_this.preview);
-                            break;
-                        case "e":
-                            _this.move(_this.operateType,location,_this.preview);
-                            break;
+                    if (_this.operateType){
+                        let operateType= _this.operateType == 'w'? _this.operateType :'e'
+
+                        _this.move(operateType,location,_this.preview);
                     }
                 }
             }
@@ -116,8 +116,7 @@
                     });
                     break;
                 case "e":
-                    if(location.x>=(this.pareWidth+this.pareOffsetX)){location.x=this.pareWidth+this.pareOffsetX}
-
+                    if(location.x>=(this.pareWidth+this.pareOffsetX)){location.x=this.pareWidth+this.pareOffsetX;break;}
                     let add_length = this.clickX - location.x;
                     this.clickX = location.x;
                     preview.css({
@@ -125,9 +124,29 @@
                     });
                     break;
             }
+            this.showTime.css({display:'block',left:((this.clickX-this.pareOffsetX)-(parseFloat(this.showTime.css('width'))/2))+'px'})
+            this.transformTime(operateType, this.clickX - this.pareOffsetX, this.pareWidth);
+        },
+        transformTime(operateType,pareOffsetX,pareWidth){
+            let _this=this;
+            //所有的秒
+            let allTime = (pareOffsetX / pareWidth) * 24 * 3600;
+            //当前所有的分钟
+            let allMinute = allTime / 60;
+            let Hour = (Math.floor(allMinute / 60).toString()).length != 2 ? "0" + Math.floor(allMinute / 60) : Math.floor(allMinute / 60);
+            let Minute = (Math.floor(allMinute % 60).toString()).length != 2 ? "0" + Math.floor(allMinute % 60) : Math.floor(allMinute % 60);
+            switch (operateType){
+                case 'w':
+                    _this.LeftTime=Hour + ":" + Minute;
+                    break;
+                case 'e':
+                    _this.RightTime=Hour + ":" + Minute;
+                    break;
+            }
+            this.showTime.children('span').html(_this.LeftTime + "-"+_this.RightTime);
         },
         _createEvent(){
-            var _this=this;
+            let _this=this;
 
             $("#leftBtn").mousedown(e=>_this.dragDown(e, "w"));
             $("#rightBtn").mousedown(e=>_this.dragDown(e, "e"));
