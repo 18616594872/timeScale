@@ -8,7 +8,8 @@
     var pluginName = "timeScale",
         defaults = {
             width: '570px',
-            background:'linear-gradient(to right,#434d5a 0,#00c7d7 50%,#434d5a 100%)'
+            background:'linear-gradient(to right,#434d5a 0,#00c7d7 50%,#434d5a 100%)',
+            defaultTime:'09:00-18:00'
         };
     function TimeScale(element, options) {
         this.element = element;
@@ -34,7 +35,7 @@
             var _this=this,
                 scaleHtml=`
                 <div id="timeScale" class="timeScale" style="position: relative;height: 27px">
-                    <div class="preview" style="width:200px;height:19px; position:absolute; left:200px; top:7px;" >
+                    <div class="preview" style="height:19px; position:absolute;  top:7px;" >
                         <div class="leftBtn" id="leftBtn" ></div>
                         <div class="rightBtn" id="rightBtn"></div>
                     </div>
@@ -47,7 +48,7 @@
                 width: _this.settings.width,
             })
                 .children(".preview").css({
-                'background':_this.settings.background
+                    'background':_this.settings.background
             })
 
         },
@@ -58,8 +59,7 @@
             }
         },
         getScaleStyle(prop){
-            let propStyle = prop != undefined ?this.preview.parent().css(prop):this.preview.parent().offset().left;
-            return propStyle;
+            return prop != undefined ?this.preview.parent().css(prop):this.preview.parent().offset().left;
         },
         dragDown(e, type){
              e=e || window.event;
@@ -67,10 +67,7 @@
             this._location = this.getLocation(e);
             this.clickX = this._location.x;
             this.operateType = type;
-            this.preview = $(".preview");
-            this.showTime=$('.showTime');
             this.pareOffsetX=this.getScaleStyle();
-            this.pareWidth=parseFloat(this.getScaleStyle('width'));
 
             return false;
 
@@ -83,8 +80,7 @@
                     e =e || window.event;
                     let location=_this.getLocation(e);
                     if (_this.operateType){
-                        let operateType= _this.operateType == 'w'? _this.operateType :'e'
-
+                        let operateType= _this.operateType == 'w' ? _this.operateType :'e'
                         _this.move(operateType,location,_this.preview);
                     }
                 }
@@ -135,15 +131,40 @@
             let allMinute = allTime / 60;
             let Hour = (Math.floor(allMinute / 60).toString()).length != 2 ? "0" + Math.floor(allMinute / 60) : Math.floor(allMinute / 60);
             let Minute = (Math.floor(allMinute % 60).toString()).length != 2 ? "0" + Math.floor(allMinute % 60) : Math.floor(allMinute % 60);
+            let transfromM=_this.transformInteger(Minute)
+
+            transfromM = transfromM.toString().length != 2 ? "0" + transfromM : transfromM;
+            if (transfromM.toString().indexOf(6) != -1) {
+                Hour=(Number(Hour) + 1).toString().length != 2 ? "0" + (Number(Hour) + 1) : (Number(Hour) + 1);
+                transfromM = "00";
+            }
             switch (operateType){
                 case 'w':
-                    _this.LeftTime=Hour + ":" + Minute;
+                    _this.LeftTime=Hour + ":" + transfromM;
                     break;
                 case 'e':
-                    _this.RightTime=Hour + ":" + Minute;
+                    _this.RightTime=Hour + ":" + transfromM;
                     break;
             }
             this.showTime.children('span').html(_this.LeftTime + "-"+_this.RightTime);
+        },
+        transformInteger(minute){
+            return (parseInt(minute/10)*10)+(parseInt(minute%10/4))*5;
+        },
+        transformScale(){
+            this.preview = $(".preview"), this.showTime=$('.showTime'),
+            this.pareWidth=parseFloat(this.getScaleStyle('width'));
+
+            this.settings.defaultTime.replace(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/,(prop,key,val)=>{this.LeftTime=key;this.RightTime=val;});
+            let leftOffset = this.getOffset(this.LeftTime);
+            let rightOffset = this.getOffset(this.RightTime);
+            console.log(leftOffset)
+            console.log(rightOffset)
+
+            this.preview.css({ left: parseInt(leftOffset), width: parseInt((rightOffset - leftOffset)) });
+        },
+        getOffset(time){
+            return time.replace(/^(\d{2}):(\d{2})$/,(str,key,val)=>(((key * 60 * 60) + (val * 60)) / (24 * 3600)) * this.pareWidth);
         },
         _createEvent(){
             let _this=this;
@@ -153,6 +174,9 @@
 
             $(document).mousemove(_this.dragMove.call(_this));
             $(document).mouseup(_this.dragUp.call(_this));
+
+            this.transformScale();
+
         }
 
     }
