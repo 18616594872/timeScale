@@ -1,5 +1,5 @@
 /**
- * 时间刻度插件
+ * Time scale plugin
  */
 ;
 (function($, window, document,undefined){
@@ -7,9 +7,12 @@
 
     var pluginName = "timeScale",
         defaults = {
-            width: '570px',
-            background:'linear-gradient(to right,#434d5a 0,#00c7d7 50%,#434d5a 100%)',
-            defaultTime:'09:00-18:00'
+            width: '570px', //time scale width
+            height:'27px', //time scale height
+            background:'linear-gradient(to right,#434d5a 0,#00c7d7 50%,#434d5a 100%)',//progress background color
+            showTimeTop:'31px',//time frame distance time scale height
+            showTimeBgColor:'#fff',//time frame background color
+            defaultTime:'09:00-18:00' //defaultTime
         };
     function TimeScale(element, options) {
         this.element = element;
@@ -17,13 +20,13 @@
         this._defaults = defaults;
         this._name = pluginName;
         this._location=null;
-        this.clickX=0;//保留上次的X轴位置
-        this.preview=null;// 要处理的对象
+        this.clickX=0;//keep the last X-axis position
+        this.preview=null;// the object to be processed
         this.operateType=null;// w:表示向左拉，e:表示向有拉
-        this.btnWidth=3 //按钮宽度
-        this.LeftTime='00:00' //保留上次左边时间
-        this.RightTime='00:00' //保留上次由边时间
-        this.pareOffsetX=0;//距离左边的偏移度
+        this.btnWidth=3 //button width
+        this.LeftTime='00:00' //keep last time left
+        this.RightTime='00:00' //keep last time right
+        this.pareOffsetX=0;//offset from the left
         this.init();
     }
     TimeScale.prototype={
@@ -34,21 +37,29 @@
         _createHtml(){
             var _this=this,
                 scaleHtml=`
-                <div id="timeScale" class="timeScale" style="position: relative;height: 27px">
-                    <div class="preview" style="height:19px; position:absolute;  top:7px;" >
-                        <div class="leftBtn" id="leftBtn" ></div>
-                        <div class="rightBtn" id="rightBtn"></div>
+                <div class="timeScale" style="position: relative;height: 27px">
+                    <div class="timeScaleTop" ></div>
+                    <div class="timeScalebody" >
+                        <div class="preview" style="height:100%; position:absolute;" >
+                                <div class="leftBtn" id="leftBtn" ></div>
+                                <div class="rightBtn" id="rightBtn"></div>
+                        </div>
+                        <div class="showTime"><span></span></div>
                     </div>
-                    <div class="showTime" id="showTime"><span></span></div>
                 </div>
                 `;
             $(_this.element).append(scaleHtml)
 
             $('.timeScale').css({
                 width: _this.settings.width,
+                height:_this.settings.height
             })
-                .children(".preview").css({
+                .find(".preview").css({
                     'background':_this.settings.background
+            })
+                .next().css({
+                top:_this.settings.showTimeTop,
+                background:_this.settings.showTimeBgColor
             })
 
         },
@@ -158,8 +169,6 @@
             this.settings.defaultTime.replace(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/,(prop,key,val)=>{this.LeftTime=key;this.RightTime=val;});
             let leftOffset = this.getOffset(this.LeftTime);
             let rightOffset = this.getOffset(this.RightTime);
-            console.log(leftOffset)
-            console.log(rightOffset)
 
             this.preview.css({ left: parseInt(leftOffset), width: parseInt((rightOffset - leftOffset)) });
         },
