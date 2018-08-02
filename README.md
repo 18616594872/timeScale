@@ -41,6 +41,9 @@ $('.demoDiv').timeScale({
 | defaultTime | string        | `'09:00-18:00'` | Default time, the scale used to convert time            |
 
 
-## Demo
+## Compatibility
+
+* Requirs jQuery 1.7+
+* Works well with all modern browsers and IE9+.
 
 
