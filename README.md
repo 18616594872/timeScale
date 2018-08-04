@@ -46,5 +46,3 @@ $('.demoDiv').timeScale({
 * Requirs jQuery 1.7+
 * Works well with all modern browsers and IE9+.
 
-
-![](https://raw.githubusercontent.com/wiki/1960492759@qq.com/timeScale/timeScale.gif)
